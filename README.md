@@ -1,22 +1,18 @@
 # Algoritmo Artificial Bee Colony (ABC)
 
-Este repositorio contiene una implementación didáctica del algoritmo de optimización heurística **Artificial Bee Colony (ABC)** en un cuaderno de Jupyter. El algoritmo busca minimizar una función objetivo dentro de los límites definidos para cada variable.
+Implementación didáctica del algoritmo de optimización **Artificial Bee Colony (ABC)**. El proyecto incluye el algoritmo en un cuaderno de Jupyter y una interfaz gráfica para explorar las fases de su ejecución.
 
-## ¿Qué hace?
+## Contenido
 
-La implementación modela las fases principales del algoritmo:
-
-- **Abejas obreras:** generan y evalúan soluciones vecinas.
-- **Abejas observadoras:** eligen soluciones según su aptitud y buscan mejorarlas.
-- **Abejas exploradoras:** reemplazan soluciones que no han mejorado después del límite de intentos.
-
-El cuaderno guarda el historial de las fases para mostrar cómo evolucionan las soluciones. Incluye un ejemplo que minimiza la suma de cuadrados de cinco variables, acotadas entre `-5.12` y `5.12`.
+- [`implementacion.ipynb`](./implementacion.ipynb): define `ArtificialBeeColony` y contiene ejemplos de optimización con una, dos y cinco variables.
+- [`abc_visualizer.py`](./abc_visualizer.py): visualiza el historial del algoritmo con tablas, gráficas de convergencia y controles para avanzar, retroceder, animar o reiniciar la ejecución.
 
 ## Requisitos
 
 - Python 3.9 o posterior.
-- JupyterLab e IPython para abrir y ejecutar el cuaderno.
-- NumPy y pandas para los cálculos y la presentación de resultados.
+- JupyterLab e IPython para ejecutar el cuaderno.
+- NumPy, pandas, Matplotlib y CustomTkinter para el algoritmo y la interfaz.
+- Tkinter, incluido habitualmente con Python. En algunas distribuciones de Linux debe instalarse por separado (por ejemplo, el paquete `python3-tk`).
 
 ## Instalación y ejecución
 
@@ -27,29 +23,50 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-En macOS o Linux, activa el entorno con:
+En macOS o Linux:
 
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 Instala las dependencias y abre JupyterLab:
 
 ```bash
-python -m pip install jupyterlab ipykernel numpy pandas
+python -m pip install jupyterlab ipykernel numpy pandas matplotlib customtkinter
 jupyter lab
 ```
 
-En JupyterLab, abre `implementacion.ipynb` y selecciona el kernel de Python del entorno virtual. Ejecuta las celdas en orden (o usa **Run All**) para correr el ejemplo y mostrar la mejor solución, el valor de la función objetivo y el historial de las iteraciones.
+Abre `implementacion.ipynb`, selecciona el kernel del entorno virtual y ejecuta las celdas en orden (o usa **Run All**). Los ejemplos ejecutan el algoritmo y abren el visualizador; se necesita un entorno de escritorio con soporte para Tkinter para mostrar la ventana.
 
-## Parámetros del algoritmo
+## Uso del algoritmo
 
-La clase `ArtificialBeeColony` recibe los siguientes parámetros:
+`ArtificialBeeColony` recibe los siguientes parámetros:
 
-- `limit`: intentos sin mejora antes de reiniciar una solución.
-- `sn`: número de soluciones o fuentes de alimento.
-- `mcn`: número máximo de ciclos.
-- `f`: función objetivo, recibida como una función de Python.
-- `seed`: semilla para reproducir los resultados aleatorios.
+| Parámetro | Descripción |
+| --- | --- |
+| `limit` | Número de intentos sin mejora que se permite a una solución antes de reemplazarla en la fase exploradora. |
+| `sn` | Número de soluciones o fuentes de alimento de la población. Debe ser al menos 2. |
+| `mcn` | Número máximo de ciclos del algoritmo. |
+| `f` | Función objetivo de Python que se desea minimizar. |
+| `seed` | Semilla para reproducir la inicialización y las decisiones aleatorias. |
 
-`execute(restrictions)` recibe una lista de pares `(mínimo, máximo)`, uno por dimensión, y devuelve la mejor solución, su valor en la función objetivo y el historial de ejecución.
+`execute(restrictions)` recibe una lista de pares `(mínimo, máximo)`, uno por variable. El número de pares debe coincidir con el número de argumentos de la función objetivo. Devuelve una tupla con la mejor solución encontrada, su valor objetivo y el historial de las fases.
+
+La clase se define en el cuaderno. Después de ejecutar la celda que la declara, un ejemplo de uso es:
+
+```python
+from abc_visualizer import show_abc
+
+f = lambda x1, x2: x1**2 + x2**2
+restrictions = [(-5.12, 5.12), (-5.12, 5.12)]
+
+abc = ArtificialBeeColony(limit=2, sn=5, mcn=60, f=f, seed=42)
+best_solution, best_value, history = abc.execute(restrictions)
+
+print("Mejor solución:", best_solution)
+print("Valor objetivo:", best_value)
+show_abc(history, abc.f, restrictions)
+```
+
+La interfaz muestra el historial de inicialización y de las fases de abejas obreras, observadoras y exploradoras. Para funciones de dos o más variables, el mapa de contorno representa las dos primeras variables; si hay más, las restantes se mantienen fijas en los valores de la mejor solución mostrada.
