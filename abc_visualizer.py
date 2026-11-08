@@ -45,8 +45,12 @@ def build_data(history: dict):
         best_value empieza como None porque todavía no se ha procesado ningún ciclo.
     """
     best_values, best_vectors, best_cycles = [], [], []
-    best_value = None
     summary = pd.DataFrame(history["fase_abejas_observadoras_resumen"])
+
+    # El mejor global empieza en la población inicial (ciclo 0)
+    init = pd.DataFrame(history["inicializacion"])
+    row = init.loc[init[VALUE_COL].idxmin()]
+    best_value, best_vector, best_cycle = row[VALUE_COL], row["Componentes"], 0
 
     # Separamos las filas por ciclo
     for cycle, rows in summary.groupby("Ciclo"): # Agrupa las filas por el valor ciclo
@@ -300,10 +304,11 @@ class ABCWindow(ctk.CTk):
         self.btn_pause.configure(state="normal" if self.playing else "disabled")
 
         best = np.array(self.best_vectors[c - 1], dtype=float)
+        found = "Inicialización" if self.best_cycles[c - 1] == 0 else self.best_cycles[c - 1]
         self.lbl_best.configure(
             text=f"Mejor solución global hasta ahora: {fmt(best)}   |   "
                  f"Valor: {self.best_values[c - 1]:.6f}   |   "
-                 f"Encontrada en el ciclo: {self.best_cycles[c - 1]}")
+                 f"Encontrada en el ciclo: {found}")
 
         for key, tree in self.trees.items():
             phase_data = self.tables[key]
